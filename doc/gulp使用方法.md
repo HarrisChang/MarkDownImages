@@ -1,3 +1,4 @@
+使用gulp有挺长一段时间了，起初只是为了用less编译css，后来慢慢拓展到压缩文件以及浏览器自动刷新等。到现在，自己已经配置了一套基本齐全的gulpfile文件，能满足小型项目开发所需的功能，文中会一一提到，这里就不再赘诉。
 ## 1、安装node.js
    1.1 gulp是基于node.js的，所以第一步需要安装node.js;
    1.2 打开[nodejs官网](https://nodejs.org/en/)，根据操作系统下载相应版本，然后安装即可；
@@ -13,10 +14,10 @@
   > 删除全部插件：`npm install rimraf \-g` 用法：`rimraf node_modules`或者将插件一个个删除
 
 - 使用npm更新插件：`npm update <name> [-g] [- -save-dev]`
-  > 更新全部插件：'npm update [- -save-dev]'
+  > 更新全部插件：`npm update [- -save-dev]`
 
 - 查看当前目录已安装插件：`npm list`
-- npm安装插件时是从http://registry.npmjs.org下载对应的插件，该网站服务器位于国外，所以国内用户下载较慢，可以添加如下命令：\-\-registry=https://registry.npm.taobao.org
+- npm安装插件时是从http://registry.npmjs.org 下载对应的插件，该网站服务器位于国外，所以国内用户下载较慢，可以添加如下命令： \-\-registry=https://registry.npm.taobao.org
 ## 3、全局安装gulp
 - 全局安装gulp是为了通过它执行gulp任务
 - 输入命令行`npm install gulp -g`
@@ -58,8 +59,6 @@ gulpfile.js是gulp项目的配置文件，一般放置于根目录
                         .pipe(browserSync.stream());  //return stream以保证browserSync.reload在正确的时机调用
                 });
 
-                /*
-
                 /* 浏览器自动刷新 */
                 gulp.task('sync',['buildCss'],function(){
                     browserSync.init({
@@ -98,5 +97,5 @@ gulpfile.js是gulp项目的配置文件，一般放置于根目录
                         .pipe(gulp.dest('dist'));
                 });
 
-
+如有疑问，欢迎留言咨询或发mail给我~
 
