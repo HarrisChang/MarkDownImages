@@ -31,67 +31,72 @@ gulpfile.js是gulp项目的配置文件，一般放置于根目录
 ## 7、通过命令行提示符运行gulp
 
 以下是我常用的gulpfie.js配置，用于常规项目已经足够，供参考。
-/* 载入插件 */
-var gulp = require('gulp'),  //基础库
-    less = require('gulp-less'),  //编译less插件
-    cleancss = require('gulp-clean-css'),  //压缩css
-    uglify = require('gulp-uglify'),  //压缩js
-    concat = require('gulp-concat'),   //合并文件
-    rename = require('gulp-rename'),  //重命名
-    clean = require('gulp-clean');    //清空文件夹
 
-/* 将node_modules目录中的文件对应到指定位置 */
-gulp.task('buildLib',function(){
-    gulp.src('./node_modules/jquery/dist/jquery.min.js')
-        .pipe(gulp.dest('./lib/js'));
-});
+                /* 载入插件 */
+                var gulp = require('gulp'),  //基础库
+                    less = require('gulp-less'), //编译less
+                    postcss = require('gulp-postcss'),  //
+                    postcssCssnext = require('postcss-cssnext'),  //
+                    browserSync = require('browser-sync').create(),  //
+                    useref = require('gulp-useref'),  //
+                    filter = require('gulp-filter'),  //
+                    csso = require('gulp-csso'),  //
+                    uglify = require('gulp-uglify'),  //
+                    rev = require('gulp-rev'),  //加md5后缀
+                    revReplace = require('gulp-rev-replace');  //替换引用的加了md5后缀的文件
+                var processors = [
+                    postcssCssnext
+                ];  //该数组将插入我们想使用的PostCss插件
 
-/* less解析 */
-gulp.task('build-less',function(){
-    //编译less目录下的所有less文件，不包含子文件夹中的less文件
-    gulp.src('./src/less/*.less')
-        .pipe(less())
-        .pipe(gulp.dest('./src/css'));
-});
+                /* less编译、css加前缀 */
+                gulp.task('buildCss',function(){
+                    //编译less目录下的所有less文件，不包含子文件夹中的less文件
+                    gulp.src('./src/less/*.less')
+                        .pipe(less())
+                        .pipe(postcss(processors))
+                        .pipe(gulp.dest('./src/css'))
+                        .pipe(browserSync.stream());  //return stream以保证browserSync.reload在正确的时机调用
+                });
 
-/* 合并、压缩、重命名css */
-gulp.task('stylesheets',['build-less'],function(){
-    gulp.src(['./src/css/*.css','!./src/css/all.css','!./src/css/all.min.css'])
-        .pipe(concat('all.css'))
-        .pipe(gulp.dest('./src/css/'))
-        .pipe(cleancss())
-        .pipe(rename({suffix : '.min'}))
-        .pipe(gulp.dest('./src/css'))
-});
+                /*
 
-/* 合并、压缩js文件 */
-gulp.task('javascripts',function(){
-    gulp.src(['./src/js/*.js','!./src/js/all.js','!./src/js/all.min.js'])
-        .pipe(concat('all.js'))
-        .pipe(gulp.dest('./src/js'))
-        .pipe(rename({suffix:'.min'}))
-        .pipe(uglify())
-        .pipe(gulp.dest('./src/js'))
-});
+                /* 浏览器自动刷新 */
+                gulp.task('sync',['buildCss'],function(){
+                    browserSync.init({
+                        server: "./src"  //初始化项目根目录为：'./src'，也可以使用代理(proxy: 'yourlocal.dev')
+                    });
+                    gulp.watch('./src/less/**/*.less',['buildCss']);  //监听less目录下的所有文件，包含子文件夹中的less文件，当less文件改变时执行buildLess
+                    gulp.watch(['./src/**/*.html','./src/**/*.js']).on('change',browserSync.reload);  //监听html,js文件的变化，自动重新载入
+                });
 
-/* 清空目标文件夹 */
-gulp.task('clean',function(){
-    //read参数为false表示不读取文件的内容
-    return gulp.src(['./dist/**/','./dist/**.**'],{read:false})
-        .pipe(clean({force:true}));
-});
+                /* 定义默认任务作为开发时使用(包含如下功能) */
+                //1.自动编译css；
+                //2.自动给css加前缀；
+                //3.当src目录下任何文件变动时自动刷新浏览器页面；
+                gulp.task('default',['sync'],function(){
+                    console.log('developing...');
+                });
+
+                /* 定义一个生产任务prod用作打包发布时使用 */
+                gulp.task('production',function(){
+                    console.log('production module');
+                    var jsFilter = filter('**/*.js',{restore: true}),
+                        cssFilter = filter('**/*.css',{restore: true}),
+                        indexHtmlFilter = filter(['**/*','!**/index.html'],{restore: true});
+                    return gulp.src('src/index.html')
+                        .pipe(useref())
+                        .pipe(jsFilter)
+                        .pipe(uglify())
+                        .pipe(jsFilter.restore)
+                        .pipe(cssFilter)
+                        .pipe(csso())
+                        .pipe(cssFilter.restore)
+                        .pipe(indexHtmlFilter)
+                        .pipe(rev())
+                        .pipe(indexHtmlFilter.restore)
+                        .pipe(revReplace())
+                        .pipe(gulp.dest('dist'));
+                });
 
 
-/* 设置默认任务 */
-gulp.task('default',['buildLib','build-less'],function(){
-    //监听less目录下的所有less文件，包含子文件夹中的less文件，当less文件改变则执行build-less
-    gulp.watch('./src/less/**/*.less',['build-less']);
-    console.log("gulp run");
-});
 
-//定义一个prod任务作为运行或发布时使用
-gulp.task('prod',['clean','javascripts','stylesheets'],function(){
-    gulp.watch('./src/less/**/*.less',['stylesheets'])
-    console.log("任务开始运行");
-});
-</pre>
