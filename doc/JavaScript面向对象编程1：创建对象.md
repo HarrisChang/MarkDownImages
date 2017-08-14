@@ -1,12 +1,7 @@
-参考文档：
-[简书](http://www.jianshu.com/p/15ac7393bc1f)
-[阮一峰](http://www.ruanyifeng.com/blog/2010/05/object-oriented_javascript_encapsulation.html)
-[oakland的GitHub](https://github.com/oakland/Native-JS-Practice/blob/master/11-learnOOPfromCircles.js/3-%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3JS%E4%B8%AD%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%EF%BC%88%E4%B8%89%E3%80%81JS%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0OOP%EF%BC%89.md)
-[Reid的博客](http://www.cnblogs.com/zhangjianhu/p/4548693.html)
+### JavaScript面向对象编程(一)：创建对象
 
-如果要总结一下，学习JS过程中最难的是什么，我会毫不犹豫地选择面向对象。之所以难，是因为JS的Object模型很独特，不容易理解。
-在C++里，对象就是类或结构体的实例，对象是由其模板实例化得到的。但JS里没有类，它是怎么定义对象的呢？
-ECMAScript-262中，对对象的定义是`无序属性的集合，其属性可以包含基本值，对象或者函数`。JS里的对象是用花括号括起来的一堆键值对，键称为对象的属性名，理论是String类型的，但实际上加不加引号都可以。值就是属性名的属性值，既可以是五大基本数据类型，也可以是另外的对象，这样对象里又可以有对象。
+
+
 #### 一、创建对象
 ##### 1.1 我们可以通过new的方式创建一个对象
 ```
